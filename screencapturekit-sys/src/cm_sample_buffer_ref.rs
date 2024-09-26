@@ -18,11 +18,28 @@ use crate::cm_block_buffer_ref::CMBlockBufferRef;
 declare_ref_type!(CMSampleBufferRef);
 
 impl CMSampleBufferRef {
-    pub fn get_frame_info(&self) -> Id<SCStreamFrameInfo> {
+    pub fn get_frame_info(&self) -> Option<Id<SCStreamFrameInfo>> {
         unsafe {
             let raw_attachments_array = CMSampleBufferGetSampleAttachmentsArray(self, 0);
-            let first = msg_send![raw_attachments_array, firstObject];
-            Id::from_ptr(first)
+
+            if raw_attachments_array.is_null() {
+                return None;
+            }
+
+            let first: *mut Object = msg_send![raw_attachments_array, firstObject];
+
+            if first.is_null() {
+                return None;
+            }
+
+            let frame_info_option: Option<Id<SCStreamFrameInfo>> =
+                Some(Id::from_ptr(first as *mut SCStreamFrameInfo));
+
+            if frame_info_option.is_none() {
+                // DO NOTHING ignore empty frame
+            }
+
+            frame_info_option
         }
     }
 

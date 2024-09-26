@@ -29,9 +29,12 @@ impl UnsafeSCStreamError for ErrorHandler {
 
 impl UnsafeSCStreamOutput for StoreImageHandler {
     fn did_output_sample_buffer(&self, sample: Id<CMSampleBufferRef>, _of_type: u8) {
-        sample.get_frame_info();
-        if let SCFrameStatus::Complete = sample.get_frame_info().status() {
-            self.tx.send(sample).ok();
+        if let Some(frame_info) = sample.get_frame_info() {
+            if frame_info.status() == SCFrameStatus::Complete {
+                self.tx.send(sample).ok();
+            }
+        } else {
+            // do nothing
         }
     }
 }

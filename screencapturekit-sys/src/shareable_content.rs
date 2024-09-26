@@ -1,4 +1,4 @@
-use std::sync::mpsc::{channel, Receiver, RecvError};
+use std::sync::mpsc::{channel, Receiver};
 
 use crate::{
     macros::get_string,
